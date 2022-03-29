@@ -40,17 +40,26 @@ class Wordbook:
         self.wifi = network.WLAN(network.STA_IF)
         if not self.wifi.isconnected():
             self.wifi.active(True) 
-            self.wifi.connect('loops','quanquan')
-            retry_times = 30
-            while not self.wifi.isconnected() and retry_times > 0:
-                print("wifi retry: " , 30-retry_times+1)
-                await uasyncio.sleep(2)
-                retry_times -= 1
-            if not self.wifi.isconnected():
-                self.wifi.active(False)
-                raise Exception('wifi connect failed')
-            print('wifi init: '+str(self.wifi.ifconfig()))
+            wifiList = self.wifi.scan()
+            for w in wifiList:
+                w = w[0].decode('utf-8')
+                if w in wbconfig.wifi:
+                    print('start to connect: '+w)
+                    self.wifi.connect(w,wbconfig.wifi[w])
+                    retry_times = 10
+                    while not self.wifi.isconnected() and retry_times > 0:
+                        print("wifi retry: " , 10-retry_times+1)
+                        await uasyncio.sleep(1)
+                        retry_times -= 1
+                    if self.wifi.isconnected():
+                        print('wifi init: '+str(self.wifi.ifconfig()))
+                        break
+            else:
+                if not self.wifi.isconnected():
+                    self.wifi.active(False)
+                    raise Exception('wifi connect failed')
 
+        # crawler
         param={
             'limit': '1000000',
             'offset': ''
@@ -59,7 +68,8 @@ class Wordbook:
         cookie = wbconfig.cookie
 
         res = request('GET','http://dict.youdao.com/wordbook/webapi/words', params=param, cookies=cookie)
-        await res.saveYoudao()
+        await res.saveYoudao(self.db)
+        self.db = DB()
         self.wifi.active(False) 
             
     # button
@@ -73,7 +83,6 @@ class Wordbook:
         print('button init')
 
         while True:
-            await uasyncio.sleep(0)
             for i in self.db.values():
                 if self.count != 0:
                     self.count -= 1
@@ -140,6 +149,7 @@ class Wordbook:
 
                     await self.epd.display_Partial(self.epd.buffer)
                     self.count = random.randint(1,100)
+            await uasyncio.sleep(0)
 
 async def main():
     wb = Wordbook()

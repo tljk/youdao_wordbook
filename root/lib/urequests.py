@@ -57,9 +57,9 @@ class Response:
                 self.raw = None
         return self._cached
     
-    async def saveYoudao(self):
+    async def saveYoudao(self,db):
         machine.freq(240000000)
-        db = DB()
+        # db = DB()
         s = ''
 
         tmp = self.__getStr()[50:]
@@ -71,6 +71,7 @@ class Response:
 
             while left >=0 and right >= left:
                 db.save(s[left:right+1])
+                db.flush()
                 await uasyncio.sleep(0)
                 
                 s = s[right+1:]
@@ -82,7 +83,6 @@ class Response:
             gc.collect()
             tmp = self.__getStr()
 
-        db.flush()
         db.close()
         machine.freq(80000000)
         print('crawler done')
