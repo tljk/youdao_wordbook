@@ -14,9 +14,11 @@ btree保存
 联网释义  
 音标显示  
 状态显示  
+休眠唤醒  
 
 ## 轮子
 [framebuf中文](https://github.com/wangshujun-tj/mpy-Framebuf-boost-code)  
 [cookie支持](https://github.com/mardigras2020/urequests)  
 [epaper驱动](https://github.com/tljk/2.13inch-e-Paper-Cloud-Module-micropython-driver)  
 [按键监听](https://github.com/peterhinch/micropython-async/blob/master/aswitch.py)  
+[有道登录](https://github.com/WYL-BruceLong/Spider_JS_ReverseParsin)  

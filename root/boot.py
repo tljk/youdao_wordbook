@@ -24,6 +24,8 @@ class Wordbook:
         self.count = random.randint(1,100)
         self.epd.Clear()
         self.epd.fill(0xff)
+
+        self.word = ''
     
     def short(self):
         print('short press')
@@ -34,6 +36,8 @@ class Wordbook:
 
     def long(self):
         print('long press')
+        self.db.record(self.word)
+        self.epd.switch = True
 
     # wifi
     async def crawler(self):
@@ -68,8 +72,11 @@ class Wordbook:
         cookie = wbconfig.cookie
 
         res = request('GET','http://dict.youdao.com/wordbook/webapi/words', params=param, cookies=cookie)
+
         await res.saveYoudao(self.db)
+        self.db.close()
         self.db = DB()
+
         self.wifi.active(False) 
             
     # button
@@ -149,6 +156,7 @@ class Wordbook:
 
                     await self.epd.display_Partial(self.epd.buffer)
                     self.count = random.randint(1,100)
+                    self.word = json['word']
             await uasyncio.sleep(0)
 
 async def main():

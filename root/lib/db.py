@@ -5,28 +5,45 @@ import ujson
 class DB():
     def __init__(self):
         try:
-            self.f = open('data','r+b')
+            self.d = open('data','r+b')
         except:
-            self.f = open('data','w+b')
-        self.db = btree.open(self.f)
+            self.d = open('data','w+b')
+        self.data = btree.open(self.d)
+        try:
+            self.r = open('record','r+b')
+        except:
+            self.r = open('record','w+b')
+        self.records = btree.open(self.r)
         print('db init')
     
     def close(self):
-        self.db.close()
-        self.f.close()
+        self.data.close()
+        self.d.close()
+        self.records.close()
+        self.r.close()
 
     def save(self,s):
         json=ujson.loads(s)
-        if self.db.get(json['word']) == None:
+        if self.data.get(json['word']) == None:
             print('insert: '+json['word'])
-            self.db[json['word']]=s.encode('utf-8')
+            self.data[json['word']]=s.encode('utf-8')
+    
+    def record(self,word):
+        if self.records.get(word) == None:
+            self.records[word] = str(1)
+            print('record: '+word+' 1')
+        else:
+            self.records[word] = str(int(self.records[word].decode('utf-8')) + 1)
+            print('record: '+word+' '+self.records[word].decode('utf-8'))
+        self.records.flush()
 
     def print(self):
-        for i in self.db.values():
+        for i in self.data.values():
             print(i.decode('utf-8'))
     
     async def flush(self):
-        self.db.flush()
+        self.data.flush()
+        self.record.flush()
 
     def values(self):
-        return self.db.values()
+        return self.data.values()

@@ -59,7 +59,6 @@ class Response:
     
     async def saveYoudao(self,db):
         machine.freq(240000000)
-        # db = DB()
         s = ''
 
         tmp = self.__getStr()[50:]
@@ -72,7 +71,6 @@ class Response:
             while left >=0 and right >= left:
                 db.save(s[left:right+1])
                 db.flush()
-                await uasyncio.sleep(0)
                 
                 s = s[right+1:]
 
@@ -81,9 +79,11 @@ class Response:
 
             await uasyncio.sleep(0)
             gc.collect()
+
             tmp = self.__getStr()
 
-        db.close()
+
+        db.flush()
         machine.freq(80000000)
         print('crawler done')
     
@@ -93,12 +93,12 @@ class Response:
         return s
 
     def __getStr(self):
-        byte = self.raw.read(256)
+        byte = self.raw.read(1024)
         if byte == b'':
             return None
-        if len(byte) == 256:
+        if len(byte) == 1024:
             b = self.raw.read(1)
-            while b!=b',' and b!=b'':
+            while b!=b',' and len(b)!=0:
                 byte += b
                 b = self.raw.read(1)
             byte += b
