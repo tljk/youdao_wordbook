@@ -153,7 +153,6 @@ class EPD_2in13_V3(framebuf.FrameBuffer):
     '''
     def spi_writebyte(self, data):
         self.spi.write(bytearray([data]))
-        # self.digital_write(self.cs_pin,0)
         # for i in range(8):
         #     if data & 0x80 == 0:
         #         self.digital_write(self.mosi_pin,0)
@@ -164,8 +163,6 @@ class EPD_2in13_V3(framebuf.FrameBuffer):
 
         #     self.digital_write(self.sck_pin,1)
         #     self.digital_write(self.sck_pin,0)
-        # self.digital_write(self.cs_pin,1)
-
 
     '''
     function :Hardware reset
@@ -419,6 +416,7 @@ class EPD_2in13_V3(framebuf.FrameBuffer):
         
         # self.SetWindows(0,0,self.width-1,self.height-1)
         # self.SetCursor(0,0)
+
         print('send frame buffer')
         self.send_command(0x24)
         for j in range(self.height-1,-1,-1):
@@ -427,7 +425,7 @@ class EPD_2in13_V3(framebuf.FrameBuffer):
 
         print('next frame ready')     
         while not self.switch:
-            await uasyncio.sleep(0)
+            await uasyncio.sleep(0) 
         self.TurnOnDisplayPart()
         self.switch = False
     

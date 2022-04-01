@@ -90,17 +90,19 @@ class Wordbook:
         print('button init')
 
         while True:
+            await uasyncio.sleep(0)
             for i in self.db.values():
                 if self.count != 0:
                     self.count -= 1
                 else:
+                    print('load data')
                     json = ujson.loads(i.decode('utf-8'))
 
                     self.epd.fill(0xff)
                     self.epd.font_set(0x23,0,1,0)
                     self.epd.text(json['word'], 0, 0, 0x00)
                     
-                    trans = json['trans'].replace(' ', '')
+                    trans = json['trans']
                     count = 0
                     for c in trans:
                         if c < '\u0080':
@@ -134,14 +136,14 @@ class Wordbook:
                     for c in trans:
                         if c < '\u0080':
                             # ascii
-                            if count + 1 <= (composeSet['width']) * 2 - 1:
+                            if count + 1 <= (composeSet['width'] - 1) * 2:
                                 count += 1
                             else:
                                 lines.append(line)
                                 line = ''
                                 count = 0
                         else:
-                            if count + 2 <= (composeSet['width']) * 2 - 1:
+                            if count + 2 <= (composeSet['width'] - 1) * 2:
                                 count += 2
                             else:
                                 lines.append(line)
@@ -152,12 +154,11 @@ class Wordbook:
                     
                     for i,l in enumerate(lines):
                         # print(l)
-                        self.epd.text(l, 0, 24 + composeSet['size'] * i, 0x00)
+                        self.epd.text(l, 0, 25 + composeSet['size'] * i, 0x00)
 
                     await self.epd.display_Partial(self.epd.buffer)
                     self.count = random.randint(1,100)
                     self.word = json['word']
-            await uasyncio.sleep(0)
 
 async def main():
     wb = Wordbook()

@@ -93,12 +93,13 @@ class Response:
         return s
 
     def __getStr(self):
-        byte = self.raw.read(1024)
+        getSize = 512
+        byte = self.raw.read(getSize)
         if byte == b'':
             return None
-        if len(byte) == 1024:
+        if len(byte) == getSize:
             b = self.raw.read(1)
-            while b!=b',' and len(b)!=0:
+            while len(b)!=0 and b[0]&0x80!=0:
                 byte += b
                 b = self.raw.read(1)
             byte += b
