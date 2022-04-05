@@ -10,6 +10,7 @@ import uasyncio
 import random
 import ure
 import wbconfig
+import machine
 
 from machine import Pin
 from urequests import request
@@ -21,7 +22,7 @@ class Wordbook:
     def __init__(self):
         self.epd = EPD_2in13_V3()
         self.db = DB()
-        self.count = random.randint(1,100)
+        self.count = random.randint(1,2000)
         self.epd.Clear()
         self.epd.fill(0xff)
 
@@ -102,7 +103,7 @@ class Wordbook:
                     self.epd.font_set(0x23,0,1,0)
                     self.epd.text(json['word'], 0, 0, 0x00)
                     
-                    trans = json['trans']
+                    trans = json['trans'].replace(' ', '')
                     count = 0
                     for c in trans:
                         if c < '\u0080':
@@ -117,13 +118,13 @@ class Wordbook:
                     # font16 15 * 6 = 90
                     # font12 20 * 8 = 160
                     composeSet = {}
-                    if count < 10 * 4 * 2:
+                    if count < (10 - 1) * 4 * 2:
                         self.epd.font_set(0x23,0,1,0)
                         composeSet = {'size': 24, 'width': 10, 'height': 4}
-                    elif count < 15 * 6 * 2:
+                    elif count < (15 - 1) * 6 * 2:
                         self.epd.font_set(0x22,0,1,0)
                         composeSet = {'size': 16, 'width': 15, 'height': 6}
-                    elif count < 20 * 8 * 2:
+                    elif count < (20 - 1) * 8 * 2:
                         self.epd.font_set(0x21,0,1,0)
                         composeSet = {'size': 12, 'width': 20, 'height': 8}
                     else:
@@ -157,7 +158,8 @@ class Wordbook:
                         self.epd.text(l, 0, 25 + composeSet['size'] * i, 0x00)
 
                     await self.epd.display_Partial(self.epd.buffer)
-                    self.count = random.randint(1,100)
+                    machine.freq(240000000)
+                    self.count = 1
                     self.word = json['word']
 
 async def main():
@@ -171,3 +173,12 @@ async def main():
     wb.wifi.active(False) 
 
 uasyncio.run(main())
+
+epd = EPD_2in13_V3()
+epd.Clear()
+import utime
+t = utime.ticks_ms()
+for j in range(epd.height-1,-1,-1):
+    for i in range(epd.buf_width):
+        epd.send_data(0xff)
+print(utime.ticks_diff(utime.ticks_ms(),t))

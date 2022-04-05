@@ -23,6 +23,39 @@ btree保存
 状态显示  
 休眠唤醒  
 
+## 使用模块
+![](https://www.waveshare.net/w/upload/thumb/5/5f/2.13inch_e-Paper_Cloud_Module.jpg/540px-2.13inch_e-Paper_Cloud_Module.jpg)  
+https://www.waveshare.net/shop/2.13inch-e-Paper-Cloud-Module.htm
+
+## 安装
+1. 下载  
+   本仓库  
+   模块驱动并安装
+2. 连接模块，在设备管理器中显示  
+3. 刷入镜像  
+   python环境，安装工具包  
+   `pip install esptool`  
+   清除flash，COM4对应着设备端口号  
+   `esptool.py --port COM4 erase_flash`  
+   刷入对应镜像  
+   `esptool.py --chip esp32 --port COM4 write_flash -z 0x1000 esp32_1.17_fb_boost_4M_ULAB.bin`
+4. 修改配置  
+   切换到Spider_JS_ReverseParsin  
+   `cd Spider_JS_ReverseParsin`  
+   安装依赖  
+   `pip install -r requirements.txt`  
+   获取有道cookie  
+   `python js逆向有道登录1.py`  
+   成功后会打印账号对应cookie以及生成单词数据文件youdao.json  
+   将cookie填入wbconfig.py中"cookie="后  
+   修改wifi ssid和密码  
+5. 上传代码  
+   安装vscode 安装Pymakr插件  
+   使用vscode打开/root文件夹  
+   连接并upload代码  
+     
+   参考[在vscode里基于Pymakr插件进行esp32的micropython开发](https://www.bilibili.com/read/cv7262936)  
+
 ## 轮子
 [framebuf中文](https://github.com/wangshujun-tj/mpy-Framebuf-boost-code)  
 [cookie支持](https://github.com/mardigras2020/urequests)  

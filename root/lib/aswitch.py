@@ -142,7 +142,7 @@ class Switch:
 class Pushbutton:
     debounce_ms = 0
     long_press_ms = 1000
-    double_click_ms = 200
+    double_click_ms = 300
     def __init__(self, pin, suppress=False):
         self.pin = pin # Initialise for input
         self._supp = suppress

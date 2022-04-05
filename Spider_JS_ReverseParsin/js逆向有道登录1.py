@@ -37,8 +37,8 @@ url = 'https://logindict.youdao.com/login/acc/login'
 
 context = js2py.EvalJs()
 
-username = ''
-password = ''
+username = input('账号：')
+password = input('密码：')
 
 with open('logincom.js', 'r') as f:
     context.execute(f.read())
@@ -52,7 +52,7 @@ var aaa = hex_md5(password);
 # print(js_string)
 
 context.execute(js_string)
-print(context.aaa)
+# print(context.aaa)
 
 # 请求参数
 data = {
