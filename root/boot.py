@@ -75,6 +75,7 @@ class Wordbook:
         res = request('GET','http://dict.youdao.com/wordbook/webapi/words', params=param, cookies=cookie)
 
         await res.saveYoudao(self.db)
+
         self.db.close()
         self.db = DB()
 
@@ -92,75 +93,79 @@ class Wordbook:
 
         while True:
             await uasyncio.sleep(0)
-            for i in self.db.values():
-                if self.count != 0:
-                    self.count -= 1
-                else:
-                    print('load data')
-                    json = ujson.loads(i.decode('utf-8'))
-
-                    self.epd.fill(0xff)
-                    self.epd.font_set(0x23,0,1,0)
-                    self.epd.text(json['word'], 0, 0, 0x00)
-                    
-                    trans = json['trans'].replace(' ', '')
-                    count = 0
-                    for c in trans:
-                        if c < '\u0080':
-                            # ascii
-                            count += 1
-                        else:
-                            count += 2
-
-                    self.epd.font_set(0x03,0,1,0)
-                    
-                    # font24 10 * 4 = 40
-                    # font16 15 * 6 = 90
-                    # font12 20 * 8 = 160
-                    composeSet = {}
-                    if count < (10 - 1) * 4 * 2:
-                        self.epd.font_set(0x23,0,1,0)
-                        composeSet = {'size': 24, 'width': 10, 'height': 4}
-                    elif count < (15 - 1) * 6 * 2:
-                        self.epd.font_set(0x22,0,1,0)
-                        composeSet = {'size': 16, 'width': 15, 'height': 6}
-                    elif count < (20 - 1) * 8 * 2:
-                        self.epd.font_set(0x21,0,1,0)
-                        composeSet = {'size': 12, 'width': 20, 'height': 8}
+            try:
+                for i in self.db.values():
+                    if self.count != 0:
+                        self.count -= 1
                     else:
-                        self.epd.font_set(0x21,0,1,0)
-                        composeSet = {'size': 12, 'width': 20, 'height': 8}
+                        print('load data')
+                        json = ujson.loads(i.decode('utf-8'))
+
+                        self.epd.fill(0xff)
+                        self.epd.font_set(0x23,0,1,0)
+                        self.epd.text(json['word'], 0, 0, 0x00)
                         
-                    lines = []
-                    line = ''
-                    count = 0
-                    for c in trans:
-                        if c < '\u0080':
-                            # ascii
-                            if count + 1 <= (composeSet['width'] - 1) * 2:
+                        trans = json['trans'].replace(' ', '')
+                        count = 0
+                        for c in trans:
+                            if c < '\u0080':
+                                # ascii
                                 count += 1
                             else:
-                                lines.append(line)
-                                line = ''
-                                count = 0
-                        else:
-                            if count + 2 <= (composeSet['width'] - 1) * 2:
                                 count += 2
-                            else:
-                                lines.append(line)
-                                line = ''
-                                count = 0
-                        line += c
-                    lines.append(line)
-                    
-                    for i,l in enumerate(lines):
-                        # print(l)
-                        self.epd.text(l, 0, 25 + composeSet['size'] * i, 0x00)
 
-                    await self.epd.display_Partial(self.epd.buffer)
-                    machine.freq(240000000)
-                    self.count = 1
-                    self.word = json['word']
+                        self.epd.font_set(0x03,0,1,0)
+                        
+                        # font24 10 * 4 = 40
+                        # font16 15 * 6 = 90
+                        # font12 20 * 8 = 160
+                        composeSet = {}
+                        if count < (10 - 1) * 4 * 2:
+                            self.epd.font_set(0x23,0,1,0)
+                            composeSet = {'size': 24, 'width': 10, 'height': 4}
+                        elif count < (15 - 1) * 6 * 2:
+                            self.epd.font_set(0x22,0,1,0)
+                            composeSet = {'size': 16, 'width': 15, 'height': 6}
+                        elif count < (20 - 1) * 8 * 2:
+                            self.epd.font_set(0x21,0,1,0)
+                            composeSet = {'size': 12, 'width': 20, 'height': 8}
+                        else:
+                            self.epd.font_set(0x21,0,1,0)
+                            composeSet = {'size': 12, 'width': 20, 'height': 8}
+                            
+                        lines = []
+                        line = ''
+                        count = 0
+                        for c in trans:
+                            if c < '\u0080':
+                                # ascii
+                                if count + 1 <= (composeSet['width'] - 1) * 2:
+                                    count += 1
+                                else:
+                                    lines.append(line)
+                                    line = ''
+                                    count = 0
+                            else:
+                                if count + 2 <= (composeSet['width'] - 1) * 2:
+                                    count += 2
+                                else:
+                                    lines.append(line)
+                                    line = ''
+                                    count = 0
+                            line += c
+                        lines.append(line)
+                        
+                        for i,l in enumerate(lines):
+                            # print(l)
+                            self.epd.text(l, 0, 25 + composeSet['size'] * i, 0x00)
+
+                        await self.epd.display_Partial(self.epd.buffer)
+
+                        machine.freq(240000000)
+                        self.count = 1
+                        self.word = json['word']
+            except:
+                self.count = random.randint(1,2000)
 
 async def main():
     wb = Wordbook()
@@ -173,12 +178,3 @@ async def main():
     wb.wifi.active(False) 
 
 uasyncio.run(main())
-
-epd = EPD_2in13_V3()
-epd.Clear()
-import utime
-t = utime.ticks_ms()
-for j in range(epd.height-1,-1,-1):
-    for i in range(epd.buf_width):
-        epd.send_data(0xff)
-print(utime.ticks_diff(utime.ticks_ms(),t))

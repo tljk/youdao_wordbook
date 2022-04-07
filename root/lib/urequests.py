@@ -70,8 +70,7 @@ class Response:
 
             while left >=0 and right >= left:
                 db.save(s[left:right+1])
-                db.flush()
-                
+
                 s = s[right+1:]
 
                 left = s.find('{')
@@ -82,8 +81,6 @@ class Response:
 
             tmp = self.__getStr()
 
-
-        db.flush()
         machine.freq(80000000)
         print('crawler done')
     

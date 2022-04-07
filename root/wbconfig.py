@@ -1,5 +1,5 @@
-cookie={}
+cookie={'DICT_LOGIN': '1||1648695107219', 'DICT_SESS': 'v2|URSM|DICT||tanglinchuanz@163.com||urstoken||BOmnAYddh0f8E9jcG_RySatbMZqujNKM8tsg0TIV_wF415ST1ltocJIKAxMzpTjh84eygISJlZOupN326WT2zlb33v8o5QBy0I_kAvRuM2vPpitcan8UVzaG91pISA1FQXsySLKFXf0X.vUzC_ydeYEgQSp6svnX1cDw5YVLspAzHIiyXA5CQHNWDGga2kKHWP70zYC27dgZJ||604800000||Yf0Mgz0LTyRllh4OM6LUGRYERfPZOLPBRYfO4UmhHkG0PKhHJBhHpFRzWPLwK64eLRez0MUlOMqZ0O5hLgBOLTBR'}
 wifi = {
-    'ssid':'password',
-    'ssid':'password',
+    '圈':'quanquan',
+    'loops':'quanquan'
 }

@@ -24,12 +24,13 @@ class DB():
 
     def save(self,s):
         json=ujson.loads(s)
-        if self.data.get(json['word']) == None:
+        if self.data.get(json['word'].encode('utf-8')) == None:
             print('insert: '+json['word'])
             self.data[json['word']]=s.encode('utf-8')
-    
+            self.data.flush()
+
     def record(self,word):
-        if self.records.get(word) == None:
+        if self.records.get(word.encode('utf-8')) == None:
             self.records[word] = str(1)
             print('record: '+word+' 1')
         else:
@@ -38,12 +39,12 @@ class DB():
         self.records.flush()
 
     def print(self):
-        for i in self.data.values():
-            print(i.decode('utf-8'))
+        for i in self.records.items():
+            print(i)
     
     async def flush(self):
         self.data.flush()
-        self.record.flush()
+        self.records.flush()
 
     def values(self):
         return self.data.values()
