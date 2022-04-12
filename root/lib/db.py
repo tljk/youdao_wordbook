@@ -38,9 +38,13 @@ class DB():
             print('record: '+word+' '+self.records[word].decode('utf-8'))
         self.records.flush()
 
-    def print(self):
+    def printRecords(self):
         for i in self.records.items():
             print(i)
+    
+    def printData(self):
+        for i in self.data.values():
+            print(i.decode('utf-8'))
     
     async def flush(self):
         self.data.flush()

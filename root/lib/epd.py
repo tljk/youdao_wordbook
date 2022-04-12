@@ -426,7 +426,7 @@ class EPD_2in13_V3(framebuf.FrameBuffer):
         machine.freq(80000000)
         print('next frame ready')     
         while not self.switch:
-            await uasyncio.sleep(0) 
+            await uasyncio.sleep(0)             
         self.TurnOnDisplayPart()
         self.switch = False
     

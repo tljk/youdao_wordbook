@@ -22,7 +22,7 @@ class Wordbook:
     def __init__(self):
         self.epd = EPD_2in13_V3()
         self.db = DB()
-        self.count = random.randint(1,2000)
+        self.count = random.randint(100,2000)
         self.epd.Clear()
         self.epd.fill(0xff)
 
@@ -76,8 +76,8 @@ class Wordbook:
 
         await res.saveYoudao(self.db)
 
-        self.db.close()
-        self.db = DB()
+        # self.db.close()
+        # self.db = DB()
 
         self.wifi.active(False) 
             
@@ -162,10 +162,11 @@ class Wordbook:
                         await self.epd.display_Partial(self.epd.buffer)
 
                         machine.freq(240000000)
-                        self.count = 1
+                        self.count = 10
                         self.word = json['word']
-            except:
-                self.count = random.randint(1,2000)
+            except BaseException as e:
+                print('exit unexpected '+str(e.args))
+                self.count = 100
 
 async def main():
     wb = Wordbook()

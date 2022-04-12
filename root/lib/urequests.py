@@ -70,7 +70,8 @@ class Response:
 
             while left >=0 and right >= left:
                 db.save(s[left:right+1])
-
+                await uasyncio.sleep(0)
+                
                 s = s[right+1:]
 
                 left = s.find('{')
