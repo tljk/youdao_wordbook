@@ -77,8 +77,8 @@ class Response:
                 left = s.find('{')
                 right = s.find('}')
 
+            db.flush()
             await uasyncio.sleep(0)
-            gc.collect()
 
             tmp = self.__getStr()
 

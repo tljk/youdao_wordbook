@@ -27,7 +27,6 @@ class DB():
         if self.data.get(json['word'].encode('utf-8')) == None:
             print('insert: '+json['word'])
             self.data[json['word']]=s.encode('utf-8')
-            self.data.flush()
 
     def record(self,word):
         if self.records.get(word.encode('utf-8')) == None:
@@ -46,7 +45,7 @@ class DB():
         for i in self.data.values():
             print(i.decode('utf-8'))
     
-    async def flush(self):
+    def flush(self):
         self.data.flush()
         self.records.flush()
 

@@ -119,6 +119,7 @@ class EPD_2in13_V3(framebuf.FrameBuffer):
         super().__init__(self.buffer, self.height, self.width, framebuf.MONO_VLSB)
 
         self.switch = True
+        self.sleepLock = uasyncio.Lock()
         self.init()
 
     '''
@@ -424,9 +425,21 @@ class EPD_2in13_V3(framebuf.FrameBuffer):
                 self.send_data(byte_filp[image[j + i * self.height]])
 
         machine.freq(80000000)
+        count = 0 
+        lock = 0
         print('next frame ready')     
         while not self.switch:
-            await uasyncio.sleep(0)             
+            await uasyncio.sleep(0)
+            count += 1
+            if count >= 2000 and not self.sleepLock.locked():
+                print('sleep...')
+                await uasyncio.sleep_ms(100)
+                machine.lightsleep() 
+                await self.sleepLock.acquire()
+                lock = 1
+                
+        if lock == 1:
+            self.sleepLock.release()
         self.TurnOnDisplayPart()
         self.switch = False
     

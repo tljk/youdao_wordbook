@@ -74,7 +74,10 @@ class Wordbook:
 
         res = request('GET','http://dict.youdao.com/wordbook/webapi/words', params=param, cookies=cookie)
 
-        await res.saveYoudao(self.db)
+        await self.epd.sleepLock.acquire()
+        res.saveYoudao(self.db)
+        self.db.flush()
+        self.epd.sleepLock.release()
 
         # self.db.close()
         # self.db = DB()
@@ -89,6 +92,8 @@ class Wordbook:
         self.pb.double_func(self.double, ())
         self.pb.long_func(self.long, ())
         self.b1.irq(trigger=Pin.IRQ_FALLING, handler=lambda t:self.pb.press())
+        import esp32
+        esp32.wake_on_ext0(pin = self.b1, level = esp32.WAKEUP_ALL_LOW)
         print('button init')
 
         while True:
@@ -164,6 +169,7 @@ class Wordbook:
                         machine.freq(240000000)
                         self.count = 10
                         self.word = json['word']
+
             except BaseException as e:
                 print('exit unexpected '+str(e.args))
                 self.count = 100
