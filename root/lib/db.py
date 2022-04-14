@@ -45,7 +45,7 @@ class DB():
         for i in self.data.values():
             print(i.decode('utf-8'))
     
-    def flush(self):
+    async def flush(self):
         self.data.flush()
         self.records.flush()
 

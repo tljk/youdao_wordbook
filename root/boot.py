@@ -42,6 +42,8 @@ class Wordbook:
 
     # wifi
     async def crawler(self):
+        await self.epd.sleepLock.acquire()
+
         self.wifi = network.WLAN(network.STA_IF)
         if not self.wifi.isconnected():
             self.wifi.active(True) 
@@ -62,6 +64,7 @@ class Wordbook:
             else:
                 if not self.wifi.isconnected():
                     self.wifi.active(False)
+                    self.epd.sleepLock.release()
                     raise Exception('wifi connect failed')
 
         # crawler
@@ -74,8 +77,7 @@ class Wordbook:
 
         res = request('GET','http://dict.youdao.com/wordbook/webapi/words', params=param, cookies=cookie)
 
-        await self.epd.sleepLock.acquire()
-        res.saveYoudao(self.db)
+        await res.saveYoudao(self.db)
         self.db.flush()
         self.epd.sleepLock.release()
 
