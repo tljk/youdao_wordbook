@@ -25,12 +25,13 @@ class Wordbook:
         self.count = random.randint(100,2000)
         self.epd.Clear()
         self.epd.fill(0xff)
+        self.switch = True
 
         self.word = ''
     
     def short(self):
         print('short press')
-        self.epd.switch = True
+        self.switch = True
     
     def double(self):
         print('double press')
@@ -38,12 +39,11 @@ class Wordbook:
     def long(self):
         print('long press')
         self.db.record(self.word)
-        self.epd.switch = True
+        self.switch = True
 
     # wifi
     async def crawler(self):
-        await self.epd.sleepLock.acquire()
-
+        await self.pb.crawlerLock.acquire()
         self.wifi = network.WLAN(network.STA_IF)
         if not self.wifi.isconnected():
             self.wifi.active(True) 
@@ -64,7 +64,7 @@ class Wordbook:
             else:
                 if not self.wifi.isconnected():
                     self.wifi.active(False)
-                    self.epd.sleepLock.release()
+                    self.pb.crawlerLock.release()
                     raise Exception('wifi connect failed')
 
         # crawler
@@ -79,12 +79,12 @@ class Wordbook:
 
         await res.saveYoudao(self.db)
         self.db.flush()
-        self.epd.sleepLock.release()
 
         # self.db.close()
         # self.db = DB()
 
         self.wifi.active(False) 
+        self.pb.crawlerLock.release()
             
     # button
     async def button(self):
@@ -166,7 +166,17 @@ class Wordbook:
                             # print(l)
                             self.epd.text(l, 0, 25 + composeSet['size'] * i, 0x00)
 
-                        await self.epd.display_Partial(self.epd.buffer)
+                        self.epd.display_Partial(self.epd.buffer)
+                        machine.freq(80000000)
+                        if self.pb.epdLock.locked():
+                            self.pb.epdLock.release()
+
+                        while not self.switch:
+                            await uasyncio.sleep(0)
+
+                        self.epd.TurnOnDisplayPart()
+                        await self.pb.epdLock.acquire()
+                        self.switch = False
 
                         machine.freq(240000000)
                         self.count = 10

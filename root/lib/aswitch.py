@@ -30,6 +30,7 @@
 
 import uasyncio as asyncio
 import utime as time
+import machine
 # Remove dependency on asyn to save RAM:
 # launch: run a callback or initiate a coroutine depending on which is passed.
 async def _g():
@@ -157,6 +158,8 @@ class Pushbutton:
         self.sense = pin.value()  # Convert from electrical to logical value
         self.state = self.rawstate()  # Initial state
         self.tsf = asyncio.ThreadSafeFlag()
+        self.crawlerLock = asyncio.Lock()
+        self.epdLock = asyncio.Lock()
         loop = asyncio.get_event_loop()
         loop.create_task(self.buttoncheck())  # Thread runs forever
     
@@ -199,8 +202,19 @@ class Pushbutton:
             self._ld = Delay_ms(self._lf, self._la)
         if self._df:
             self._dd = Delay_ms(self._ddto)
+            
+        count = 0
         while True:
-            state = self.rawstate()
+            count += 1
+            if count >= 1000 and not self.crawlerLock.locked() and not self.epdLock.locked():
+                count = 0
+                print('sleep')
+                await asyncio.sleep_ms(100)
+                machine.lightsleep()
+                state = True
+            else:
+                state = self.rawstate()
+                
             # State has changed: act on it now.
             if state != self.state:
                 self.state = state
