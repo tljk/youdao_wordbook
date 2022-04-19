@@ -14,6 +14,7 @@ btree保存
 根据随机数遍历随机次实现随机单词  
 显示单词释义，排版切换字体  
 异步执行按键监听和爬虫  
+休眠唤醒  
 
 ## 将要实现
 复习模式，记录单词复习情况（记得/不记得），根据记录选择复习的单词  
@@ -21,7 +22,6 @@ btree保存
 联网释义  
 音标显示  
 状态显示  
-休眠唤醒  
 
 ## 使用模块
 ![](https://www.waveshare.net/w/upload/thumb/5/5f/2.13inch_e-Paper_Cloud_Module.jpg/540px-2.13inch_e-Paper_Cloud_Module.jpg)  

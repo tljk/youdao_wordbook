@@ -205,7 +205,8 @@ class Pushbutton:
             
         count = 0
         while True:
-            count += 1
+            if count < 1000:
+                count += 1
             if count >= 1000 and not self.crawlerLock.locked() and not self.epdLock.locked():
                 count = 0
                 print('sleep')
