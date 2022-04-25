@@ -74,17 +74,16 @@ class Wordbook:
         }
         # cookie
         cookie = wbconfig.cookie
+        try:
+            res = request('GET','http://dict.youdao.com/wordbook/webapi/words', params=param, cookies=cookie)
 
-        res = request('GET','http://dict.youdao.com/wordbook/webapi/words', params=param, cookies=cookie)
-
-        await res.saveYoudao(self.db)
-        self.db.flush()
-
-        # self.db.close()
-        # self.db = DB()
-
-        self.wifi.active(False) 
-        self.pb.crawlerLock.release()
+            await res.saveYoudao(self.db)
+            self.db.flush()
+        except BaseException as e:
+                print('crawler failed '+str(e.args))
+        finally:
+            self.wifi.active(False) 
+            self.pb.crawlerLock.release()
             
     # button
     async def button(self):
@@ -93,7 +92,7 @@ class Wordbook:
         self.pb.release_func(self.short, ())
         self.pb.double_func(self.double, ())
         self.pb.long_func(self.long, ())
-        self.b1.irq(trigger=Pin.IRQ_FALLING, handler=lambda t:self.pb.press())
+        # self.b1.irq(trigger=Pin.IRQ_FALLING, handler=lambda t:self.pb.press())
         import esp32
         esp32.wake_on_ext0(pin = self.b1, level = esp32.WAKEUP_ALL_LOW)
         print('button init')
@@ -167,18 +166,18 @@ class Wordbook:
                             self.epd.text(l, 0, 25 + composeSet['size'] * i, 0x00)
 
                         self.epd.display_Partial(self.epd.buffer)
-                        machine.freq(80000000)
                         if self.pb.epdLock.locked():
                             self.pb.epdLock.release()
 
+                        machine.freq(80000000)
                         while not self.switch:
                             await uasyncio.sleep(0)
+                        machine.freq(240000000)
 
                         self.epd.TurnOnDisplayPart()
                         await self.pb.epdLock.acquire()
                         self.switch = False
 
-                        machine.freq(240000000)
                         self.count = 10
                         self.word = json['word']
 

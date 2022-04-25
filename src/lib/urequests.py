@@ -7,6 +7,17 @@ import uasyncio
 from db import DB
 from urllib.parse import urlencode
 
+header = {
+    'Accept':'text/plain, */*; q=0.01',
+    'Accept-Encoding': 'gzip, deflate',
+    'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6',
+    'Cache-Control': 'no-cache',
+    'Connection': 'keep-alive',
+    'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.127 Safari/537.36 Edg/100.0.1185.50',
+    'X-Requested-With': 'XMLHttpRequest',
+}
+
 class Response:
 
     def __init__(self, f):
@@ -90,7 +101,7 @@ class Response:
         return s
 
     def __getStr(self):
-        getSize = 512
+        getSize = 256
         byte = self.raw.read(getSize)
         if byte == b'':
             return None
