@@ -6,7 +6,9 @@ for /d /r src\ %%i in (*) do (
 for /r src\ %%i in (*.py) do (
 	call :compile %%i
 )
-pause
+del build\boot.mpy
+copy src\boot.py build\
+copy src\*.fon build\
 
 :makedir
 set var=%1
