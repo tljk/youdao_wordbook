@@ -32,13 +32,14 @@ js 逆向
 '''
 import js2py
 import requests
+import getpass
 
 url = 'https://logindict.youdao.com/login/acc/login'
 
 context = js2py.EvalJs()
 
 username = input('账号：')
-password = input('密码：')
+password = getpass.getpass('密码：')
 
 with open('logincom.js', 'r') as f:
     context.execute(f.read())

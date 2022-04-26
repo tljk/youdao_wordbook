@@ -8,21 +8,22 @@ import network
 import ujson
 import uasyncio
 import random
-import ure
 import wbconfig
 import machine
+import os
 
 from machine import Pin
 from urequests import request
 from epd import EPD_2in13_V3
 from aswitch import Pushbutton
 from db import DB
+from log import logToFile
 
 class Wordbook:
     def __init__(self):
         self.epd = EPD_2in13_V3()
         self.db = DB()
-        self.count = random.randint(100,2000)
+        self.count = random.randint(100,5000)
         self.epd.Clear()
         self.epd.fill(0xff)
         self.switch = True
@@ -111,9 +112,8 @@ class Wordbook:
                         self.epd.font_set(0x23,0,1,0)
                         self.epd.text(json['word'], 0, 0, 0x00)
                         
-                        trans = json['trans'].replace(' ', '')
                         count = 0
-                        for c in trans:
+                        for c in json['trans']:
                             if c < '\u0080':
                                 # ascii
                                 count += 1
@@ -142,7 +142,7 @@ class Wordbook:
                         lines = []
                         line = ''
                         count = 0
-                        for c in trans:
+                        for c in json['trans']:
                             if c < '\u0080':
                                 # ascii
                                 if count + 1 <= (composeSet['width'] - 1) * 2:
@@ -178,14 +178,17 @@ class Wordbook:
                         await self.pb.epdLock.acquire()
                         self.switch = False
 
-                        self.count = 10
+                        self.count = 1
                         self.word = json['word']
-
+                        
             except BaseException as e:
                 print('exit unexpected '+str(e.args))
                 self.count = 100
 
 async def main():
+    # Begin loging to file
+    os.dupterm(logToFile())
+    
     wb = Wordbook()
     await uasyncio.gather(wb.button(),wb.crawler())
 
@@ -194,5 +197,8 @@ async def main():
     wb.epd.font_free()
     wb.db.close()
     wb.wifi.active(False) 
+
+    # Stop loging to file
+    os.dupterm(None)
 
 uasyncio.run(main())

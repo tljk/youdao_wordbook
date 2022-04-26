@@ -1,6 +1,6 @@
 import btree
 import ujson
-
+import ure
 
 class DB():
     def __init__(self):
@@ -26,7 +26,7 @@ class DB():
         json=ujson.loads(s)
         if self.data.get(json['word'].encode('utf-8')) == None:
             print('insert: '+json['word'])
-            self.data[json['word']]=s.encode('utf-8')
+            self.data[json['word']]=s.replace(' ', '').encode('utf-8')
 
     def record(self,word):
         if self.records.get(word.encode('utf-8')) == None:

@@ -44,12 +44,6 @@ class Response:
             [ure.compile('【'),'['],
             [ure.compile('】'),']'],
         ]
-        self.itemID =  ure.compile('"itemId":"[0-9a-z]+",')
-        self.bookId =  ure.compile('"bookId":"[0-9a-z]+",')
-        self.modifiedTime = ure.compile('"modifiedTime":[0-9]+')
-        self.enter = ure.compile('\\\\n')
-        self.comma = ure.compile('，')
-        self.semicolon = ure.compile('；')
         
 
     def close(self):
