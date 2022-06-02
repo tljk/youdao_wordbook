@@ -26,7 +26,8 @@ class DB():
         json=ujson.loads(s)
         if self.data.get(json['word'].encode('utf-8')) == None:
             print('insert: '+json['word'])
-            self.data[json['word']]=s.replace(' ', '').encode('utf-8')
+            json['trans']=json['trans'].replace(' ', '')
+            self.data[json['word']]=ujson.dumps(json).encode('utf-8')
 
     def record(self,word):
         if self.records.get(word.encode('utf-8')) == None:

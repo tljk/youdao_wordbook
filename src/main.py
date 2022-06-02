@@ -25,61 +25,70 @@ class Wordbook:
         self.epd.Clear()
         self.epd.fill(0xff)
         self.switch = True
+        self.crawl = True
         self.lock = uasyncio.Lock()
         self.word = ''
 
     # wifi
     async def crawler(self):
-        await self.lock.acquire()
-        self.wifi = network.WLAN(network.STA_IF)
-        if not self.wifi.isconnected():
-            self.wifi.active(True) 
-            wifiList = self.wifi.scan()
-            for w in wifiList:
-                w = w[0].decode('utf-8')
-                if w in wbconfig.wifi:
-                    print('start to connect: '+w)
-                    self.wifi.connect(w,wbconfig.wifi[w])
-                    retry_times = 10
-                    while not self.wifi.isconnected() and retry_times > 0:
-                        print("wifi retry: " , 10-retry_times+1)
-                        await uasyncio.sleep(1)
-                        retry_times -= 1
-                    if self.wifi.isconnected():
-                        print('wifi init: '+str(self.wifi.ifconfig()))
-                        break
-            else:
+        while True:
+            await uasyncio.sleep(0)
+            while not self.crawl:
+                await uasyncio.sleep(0)
+
+            await self.lock.acquire()
+            self.crawl = False
+            await uasyncio.sleep(0)
+            
+            try:
+                self.wifi = network.WLAN(network.STA_IF)
+                self.wifi.active(True) 
+                wifiList = self.wifi.scan()
+
+                for w in wifiList:
+                    w = w[0].decode('utf-8')
+                    if w in wbconfig.wifi:
+                        print('start to connect: '+w)
+                        self.wifi.connect(w,wbconfig.wifi[w])
+                        retry_times = 10
+                        while not self.wifi.isconnected() and retry_times > 0:
+                            print("wifi retry: " , 10-retry_times+1)
+                            await uasyncio.sleep(1)
+                            retry_times -= 1
+                        if self.wifi.isconnected():
+                            print('wifi init: '+str(self.wifi.ifconfig()))
+                            break
+
                 if not self.wifi.isconnected():
-                    self.wifi.active(False)
-                    self.lock.release()
-                    uasyncio.current_task().cancel()
                     print('wifi connect failed')
-                    # raise uasyncio.CancelledError('wifi connect failed')
+                else:
+                    # crawler
+                    param={
+                        'limit': '1000000',
+                        'offset': ''
+                    }
+                    # cookie
+                    cookie = wbconfig.cookie
+                    try:
+                        res = request('GET','http://dict.youdao.com/wordbook/webapi/words', params=param, cookies=cookie)
+                        await res.saveYoudao(self.db)
+                    except BaseException as e:
+                        self.lock.release()
+                        self.wifi.active(False) 
+                        print('crawler failed')                        
+                    self.db.flush()
 
-        # crawler
-        param={
-            'limit': '1000000',
-            'offset': ''
-        }
-        # cookie
-        cookie = wbconfig.cookie
-        try:
-            res = request('GET','http://dict.youdao.com/wordbook/webapi/words', params=param, cookies=cookie)
+            except BaseException as e:
+                pass
 
-            await res.saveYoudao(self.db)
-            self.db.flush()
-        except BaseException as e:
-            self.db.flush()
             self.lock.release()
             self.wifi.active(False) 
-            print('crawler failed')
-            uasyncio.current_task().cancel()
-            # raise uasyncio.CancelledError('crawler failed')
-        self.lock.release()
-        self.wifi.active(False) 
     
     def press(self):
         self.switch = True
+
+    def wake(self):
+        self.crawl = True
 
     # button
     async def button(self):
@@ -91,7 +100,7 @@ class Wordbook:
 
         while True:
             await uasyncio.sleep(0)
-            # try:
+
             for i in self.db.values():
                 if self.count != 0:
                     self.count -= 1
@@ -160,11 +169,13 @@ class Wordbook:
 
                     machine.freq(80000000)
                     while not self.switch:
+                        await uasyncio.sleep(0)
                         if not self.lock.locked():
                             print('sleep')
                             await uasyncio.sleep(0.1)
-                            machine.lightsleep()
-                        await uasyncio.sleep(0.01)
+                            machine.lightsleep(1000*60*60)
+                            self.wake()
+
                     machine.freq(240000000)
 
                     self.epd.TurnOnDisplayPart()
@@ -172,7 +183,3 @@ class Wordbook:
 
                     self.count = 1
                     self.word = json['word']
-                        
-            # except BaseException as e:
-            #     print('exit unexpected '+str(e.args))
-            #     self.count = 100

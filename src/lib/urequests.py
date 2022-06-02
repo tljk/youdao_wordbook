@@ -95,7 +95,7 @@ class Response:
         return s
 
     def __getStr(self):
-        getSize = 256
+        getSize = 512
         byte = self.raw.read(getSize)
         if byte == b'':
             return None
