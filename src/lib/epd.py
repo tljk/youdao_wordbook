@@ -400,7 +400,7 @@ class EPD_2in13_V3(framebuf.FrameBuffer):
     parameter:
         image : Image data
     '''    
-    @timed_function
+    #@timed_function
     def display_Partial(self, image):
         self.digital_write(self.reset_pin, 0)
         self.delay_ms(1)

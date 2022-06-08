@@ -10,13 +10,14 @@ import uasyncio
 import random
 import wbconfig
 import machine
+import phonetic
+import framebuf
 
 from machine import Pin
 from urequests import request
 from epd import EPD_2in13_V3
 from db import DB
-from log import logToFile
-
+import gc
 class Wordbook:
     def __init__(self):
         self.epd = EPD_2in13_V3()
@@ -38,7 +39,7 @@ class Wordbook:
 
             await self.lock.acquire()
             self.crawl = False
-            await uasyncio.sleep(0)
+            await uasyncio.sleep(1)
             
             try:
                 self.wifi = network.WLAN(network.STA_IF)
@@ -83,6 +84,7 @@ class Wordbook:
 
             self.lock.release()
             self.wifi.active(False) 
+            gc.collect()
     
     def press(self):
         self.switch = True
@@ -105,20 +107,35 @@ class Wordbook:
                 if self.count != 0:
                     self.count -= 1
                 else:
-                    print('load data')
+                    # print('load data')
+                    gc.collect()
                     json = ujson.loads(i.decode('utf-8'))
 
                     self.epd.fill(0xff)
                     self.epd.font_set(0x23,0,1,0)
                     self.epd.text(json['word'], 0, 0, 0x00)
+
+                    offset = 4
+                    for c in json['phonetic']:
+                        if phonetic.font.get(c):
+                            font_buf = bytearray(phonetic.font.get(c))
+                            font_framebuffer = framebuf.FrameBuffer(font_buf, len(font_buf)//3, 24, framebuf.MONO_HLSB)
+                            self.epd.blit(font_framebuffer, len(json['word'])*12+offset, 0)
+                            if c in '(),-.:;[]ˈˌː':
+                                offset+=4
+                            elif c in 'mwæ':
+                                offset+=12
+                            else:
+                                offset+=len(font_buf)//3
                     
-                    count = 0
-                    for c in json['trans']:
-                        if c < '\u0080':
-                            # ascii
-                            count += 1
-                        else:
-                            count += 2
+                    count = len(json['trans'].encode())
+                    # count = 0
+                    # for c in self.json['trans']:
+                    #     if c < '\u0080':
+                    #         # ascii
+                    #         count += 1
+                    #     else:
+                    #         count += 2
 
                     self.epd.font_set(0x03,0,1,0)
                     
@@ -126,44 +143,26 @@ class Wordbook:
                     # font16 15 * 6 = 90
                     # font12 20 * 8 = 160
                     composeSet = {}
-                    if count < (10 - 1) * 4 * 2:
+                    if count < (10) * 4 * 3:
                         self.epd.font_set(0x23,0,1,0)
                         composeSet = {'size': 24, 'width': 10, 'height': 4}
-                    elif count < (15 - 1) * 6 * 2:
+                    elif count < (15) * 6 * 3:
                         self.epd.font_set(0x22,0,1,0)
                         composeSet = {'size': 16, 'width': 15, 'height': 6}
-                    elif count < (20 - 1) * 8 * 2:
+                    elif count < (20) * 8 * 3:
                         self.epd.font_set(0x21,0,1,0)
                         composeSet = {'size': 12, 'width': 20, 'height': 8}
                     else:
                         self.epd.font_set(0x21,0,1,0)
                         composeSet = {'size': 12, 'width': 20, 'height': 8}
-                        
-                    lines = []
-                    line = ''
-                    count = 0
-                    for c in json['trans']:
-                        if c < '\u0080':
-                            # ascii
-                            if count + 1 <= (composeSet['width'] - 1) * 2:
-                                count += 1
-                            else:
-                                lines.append(line)
-                                line = ''
-                                count = 0
-                        else:
-                            if count + 2 <= (composeSet['width'] - 1) * 2:
-                                count += 2
-                            else:
-                                lines.append(line)
-                                line = ''
-                                count = 0
-                        line += c
-                    lines.append(line)
                     
-                    for i,l in enumerate(lines):
-                        # print(l)
-                        self.epd.text(l, 0, 25 + composeSet['size'] * i, 0x00)
+                    start=0 
+                    end=0
+                    for i in range(composeSet['height']):
+                        offset = (composeSet['width']*3 - len(json['trans'][start:start+composeSet['width']].encode()))//3 - 1
+                        end = start + composeSet['width'] + offset
+                        self.epd.text(json['trans'][start:end], 0, 25 + composeSet['size'] * i, 0x00)
+                        start=end
 
                     self.epd.display_Partial(self.epd.buffer)
 
@@ -177,7 +176,6 @@ class Wordbook:
                             self.wake()
 
                     machine.freq(240000000)
-
                     self.epd.TurnOnDisplayPart()
                     self.switch = False
 
