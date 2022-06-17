@@ -59,11 +59,13 @@ context.execute(js_string)
 data = {
     'app': 'web',
     'tp': 'urstoken',
-    'cf': 3,
+    'cf': 7,
     'fr': 1,
     'product': 'DICT',
     'type': 1,
     'um': 'true',
+    'agreePrRule': 1,
+    'savelogin': 1,
     'username': username,
     'password': context.aaa,
     'ru': 'http://dict.youdao.com/wordbook/webapi/words?limit=10000000&offset=0'
