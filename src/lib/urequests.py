@@ -32,9 +32,9 @@ class Response:
         # url to see redirect targets
         self.url = None
         self.res = [
-            [ure.compile('"itemId":"[0-9a-z]+",'),''],
-            [ure.compile('"bookId":"[0-9a-z]+",'),''],
-            [ure.compile('"modifiedTime":[0-9]+'),''],
+            # [ure.compile('"itemId":"[0-9a-z]+",'),''],
+            # [ure.compile('"bookId":"[0-9a-z]+",'),''],
+            # [ure.compile('"modifiedTime":[0-9]+'),''],
             [ure.compile('\\\\n'),''],
             [ure.compile('，'),','],
             [ure.compile('；'),';'],
@@ -67,6 +67,7 @@ class Response:
         s = ''
 
         tmp = self.__getStr()[50:]
+        tmp = self.re(self.res,tmp)
         while tmp != None:
             s += tmp
 
@@ -85,13 +86,15 @@ class Response:
             await uasyncio.sleep(0)
 
             tmp = self.__getStr()
+            tmp = self.re(self.res,tmp)
 
         machine.freq(80000000)
         print('crawler done')
     
     def re(self,re,s):
-        for i in re:
-            s = i[0].sub(i[1],s)
+        if s != None:
+            for i in re:
+                s = i[0].sub(i[1],s)
         return s
 
     def __getStr(self):
@@ -107,7 +110,7 @@ class Response:
             byte += b
         s = byte.decode(self.encoding)
 
-        s = self.re(self.res,s)
+        # s = self.re(self.res,s)
         # print(s)
         return s
 

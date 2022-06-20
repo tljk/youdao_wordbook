@@ -1,6 +1,5 @@
 import btree
 import ujson
-import ure
 
 class DB():
     def __init__(self):
@@ -25,9 +24,15 @@ class DB():
     def save(self,s):
         json=ujson.loads(s)
         if self.data.get(json['word'].encode('utf-8')) == None:
-            print('insert: '+json['word'])
+            word = json['word']
+            json.pop('word')
+            json.pop('itemId')
+            json.pop('modifiedTime')
+            json.pop('bookId')
             json['trans']=json['trans'].replace(' ', '')
-            self.data[json['word']]=ujson.dumps(json).encode('utf-8')
+            print('insert: '+word)
+            # print(word+': '+ujson.dumps(json))
+            self.data[word]=ujson.dumps(json).encode('utf-8')
 
     def record(self,word):
         if self.records.get(word.encode('utf-8')) == None:

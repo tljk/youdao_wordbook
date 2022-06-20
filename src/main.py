@@ -26,7 +26,6 @@ class Wordbook:
         self.epd.Clear()
         self.epd.fill(0xff)
         self.switch = True
-        self.crawl = True
         self.lock = uasyncio.Lock()
         self.word = ''
 
@@ -34,12 +33,8 @@ class Wordbook:
     async def crawler(self):
         while True:
             await uasyncio.sleep(0)
-            while not self.crawl:
+            while not self.lock.locked():
                 await uasyncio.sleep(0)
-
-            await self.lock.acquire()
-            self.crawl = False
-            await uasyncio.sleep(1)
             
             try:
                 self.wifi = network.WLAN(network.STA_IF)
@@ -70,18 +65,19 @@ class Wordbook:
                     }
                     # cookie
                     cookie = wbconfig.cookie
-                    try:
-                        res = request('GET','http://dict.youdao.com/wordbook/webapi/words', params=param, cookies=cookie)
-                        await res.saveYoudao(self.db)
-                    except BaseException as e:
-                        self.lock.release()
-                        self.wifi.active(False) 
-                        print('crawler failed')                        
+                    # try:
+                    res = request('GET','http://dict.youdao.com/wordbook/webapi/words', params=param, cookies=cookie)
+                    await res.saveYoudao(self.db)
+                    # except BaseException as e:
+                    #     # self.lock.release()
+                    #     # self.wifi.active(False) 
+                    #     print('crawler failed')                        
                     self.db.flush()
 
             except BaseException as e:
-                pass
+                print('crawler failed')
 
+            self.db.flush()
             self.lock.release()
             self.wifi.active(False) 
             gc.collect()
@@ -89,8 +85,8 @@ class Wordbook:
     def press(self):
         self.switch = True
 
-    def wake(self):
-        self.crawl = True
+    async def wake(self):
+        await self.lock.acquire()
 
     # button
     async def button(self):
@@ -103,24 +99,24 @@ class Wordbook:
         while True:
             await uasyncio.sleep(0)
 
-            for i in self.db.values():
+            for w in self.db.data.items():
                 if self.count != 0:
                     self.count -= 1
                 else:
                     # print('load data')
                     gc.collect()
-                    json = ujson.loads(i.decode('utf-8'))
+                    json = ujson.loads(w[1].decode('utf-8'))
 
                     self.epd.fill(0xff)
                     self.epd.font_set(0x23,0,1,0)
-                    self.epd.text(json['word'], 0, 0, 0x00)
+                    self.epd.text(w[0], 0, 0, 0x00)
 
                     offset = 4
                     for c in json['phonetic']:
                         if phonetic.font.get(c):
                             font_buf = bytearray(phonetic.font.get(c))
                             font_framebuffer = framebuf.FrameBuffer(font_buf, len(font_buf)//3, 24, framebuf.MONO_HLSB)
-                            self.epd.blit(font_framebuffer, len(json['word'])*12+offset, 0)
+                            self.epd.blit(font_framebuffer, len(w[0])*12+offset, 0)
                             if c in '(),-.:;[]ˈˌː':
                                 offset+=4
                             elif c in 'mwæ':
@@ -173,11 +169,10 @@ class Wordbook:
                             print('sleep')
                             await uasyncio.sleep(0.1)
                             machine.lightsleep(1000*60*60)
-                            self.wake()
+                            await self.wake()
 
                     machine.freq(240000000)
                     self.epd.TurnOnDisplayPart()
                     self.switch = False
 
                     self.count = 1
-                    self.word = json['word']

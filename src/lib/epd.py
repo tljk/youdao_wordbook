@@ -239,7 +239,7 @@ class EPD_2in13_V3(framebuf.FrameBuffer):
     '''
     def TurnOnDisplayPart(self):
         self.send_command(0x22)  # Display Update Control
-        self.send_data(0x0F)     # fast:0x0c, quality:0x0f, 0xcf
+        self.send_data(0xcf)     # fast:0x0c, quality:0x0f, 0xcf
         self.send_command(0x20)  # Activate Display Update Sequence 
         self.ReadBusy()
     
