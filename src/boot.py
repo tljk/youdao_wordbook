@@ -19,8 +19,9 @@ async def main():
     wb.epd.font_free()
     wb.db.close()
     wb.wifi.active(False) 
-    
-try:
-    uasyncio.run(main())
-finally:
-    uasyncio.new_event_loop()  # Clear retained state
+
+while True:
+    try:
+        uasyncio.run(main())
+    finally:
+        uasyncio.new_event_loop()  # Clear retained state

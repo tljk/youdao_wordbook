@@ -12,12 +12,12 @@ import wbconfig
 import machine
 import phonetic
 import framebuf
+import gc
 
 from machine import Pin
 from urequests import request
 from epd import EPD_2in13_V3
 from db import DB
-import gc
 class Wordbook:
     def __init__(self):
         self.epd = EPD_2in13_V3()
@@ -75,7 +75,7 @@ class Wordbook:
                     self.db.flush()
 
             except BaseException as e:
-                print('crawler failed')
+                print('crawler failed: ' + str(e.args))
 
             self.db.flush()
             self.lock.release()
@@ -125,6 +125,12 @@ class Wordbook:
                                 offset+=len(font_buf)//3
                     
                     count = len(json['trans'].encode())
+                    length = len(json['trans'])
+                    
+                    y = (count - length)//2
+                    x = length - y
+
+                    count = x + 2 * y
                     # count = 0
                     # for c in self.json['trans']:
                     #     if c < '\u0080':
@@ -139,13 +145,13 @@ class Wordbook:
                     # font16 15 * 6 = 90
                     # font12 20 * 8 = 160
                     composeSet = {}
-                    if count < (10) * 4 * 3:
+                    if count < (10) * 4 * 2:
                         self.epd.font_set(0x23,0,1,0)
                         composeSet = {'size': 24, 'width': 10, 'height': 4}
-                    elif count < (15) * 6 * 3:
+                    elif count < (15) * 6 * 2:
                         self.epd.font_set(0x22,0,1,0)
                         composeSet = {'size': 16, 'width': 15, 'height': 6}
-                    elif count < (20) * 8 * 3:
+                    elif count < (20) * 8 * 2:
                         self.epd.font_set(0x21,0,1,0)
                         composeSet = {'size': 12, 'width': 20, 'height': 8}
                     else:
@@ -169,7 +175,9 @@ class Wordbook:
                             print('sleep')
                             await uasyncio.sleep(0.1)
                             machine.lightsleep(1000*60*60)
-                            await self.wake()
+                            # print(machine.wake_reason())
+                            if machine.wake_reason() == 4:
+                                await self.wake()
 
                     machine.freq(240000000)
                     self.epd.TurnOnDisplayPart()
