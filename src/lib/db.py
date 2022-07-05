@@ -7,12 +7,12 @@ class DB():
             self.d = open('data','r+b')
         except:
             self.d = open('data','w+b')
-        self.data = btree.open(self.d)
+        self.data = btree.open(self.d, pagesize=1024)
         try:
             self.r = open('record','r+b')
         except:
             self.r = open('record','w+b')
-        self.records = btree.open(self.r)
+        self.records = btree.open(self.r, pagesize=1024)
         print('db init')
     
     def close(self):
