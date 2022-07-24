@@ -58,7 +58,7 @@ https://www.waveshare.net/shop/2.13inch-e-Paper-Cloud-Module.htm
    参考[在vscode里基于Pymakr插件进行esp32的micropython开发](https://www.bilibili.com/read/cv7262936)  
 
 ## 外壳
-[![cover.png](https://github.com/tljk/youdao_wordbook/blob/master/shell.png)]  
+![cover.png](https://github.com/tljk/youdao_wordbook/blob/master/shell.png)  
 模型文件：[shell2 v8.f3d](https://github.com/tljk/youdao_wordbook/blob/master/shell2_v8.f3d), [shell2 v8.stl](https://github.com/tljk/youdao_wordbook/blob/master/shell2_v8.stl)  
 壁面很薄，打印请使用刚性树脂，周围添加支撑
 
