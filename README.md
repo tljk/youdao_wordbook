@@ -1,6 +1,6 @@
 # 有道单词卡
 基于微雪2.13墨水屏模块开发，实现单词学习/复习，词库同步有道单词本  
-![demo.gif](https://github.com/tljk/youdao_wordbook/blob/master/demo.gif)  
+[![cover.png](https://github.com/tljk/youdao_wordbook/blob/master/cover.png)](https://www.bilibili.com/video/BV1yv4y1M7Wo)  
 
 ## 前言
 单词本里加了很多的单词，但是不见得就去复习  
@@ -15,16 +15,17 @@ btree保存
 显示单词释义，排版切换字体  
 异步执行按键监听和爬虫  
 休眠唤醒  
+使用有道桌面版或者web版可以更新内容
+音标显示
 
 ## 将要实现
-复习模式，记录单词复习情况（记得/不记得），根据记录选择复习的单词  
-添加模式（学习模式），向有道单词本及本地数据添加单词  
-联网释义  
-音标显示  
+复习模式，记录单词复习情况（记得/不记得），根据记录选择复习的单词    
+联网释义    
 状态显示  
+同步删除  
 
 ## 使用模块
-![](https://www.waveshare.net/w/upload/thumb/5/5f/2.13inch_e-Paper_Cloud_Module.jpg/540px-2.13inch_e-Paper_Cloud_Module.jpg)  
+![](http://www.waveshare.net/photo/LCD/2.13inch-e-Paper-Cloud-Module/2.13inch-e-Paper-Cloud-Module-1.jpg)  
 https://www.waveshare.net/shop/2.13inch-e-Paper-Cloud-Module.htm
 
 ## 安装
@@ -56,9 +57,13 @@ https://www.waveshare.net/shop/2.13inch-e-Paper-Cloud-Module.htm
      
    参考[在vscode里基于Pymakr插件进行esp32的micropython开发](https://www.bilibili.com/read/cv7262936)  
 
+## 外壳
+[![cover.png](https://github.com/tljk/youdao_wordbook/blob/master/shell.png)]  
+模型文件：[shell2 v8.f3d](https://github.com/tljk/youdao_wordbook/blob/master/shell2_v8.f3d), [shell2 v8.stl](https://github.com/tljk/youdao_wordbook/blob/master/shell2_v8.stl)  
+壁面很薄，打印请使用刚性树脂，周围添加支撑
+
 ## 轮子
 [framebuf中文](https://github.com/wangshujun-tj/mpy-Framebuf-boost-code)  
 [cookie支持](https://github.com/mardigras2020/urequests)  
 [epaper驱动](https://github.com/tljk/2.13inch-e-Paper-Cloud-Module-micropython-driver)  
-[按键监听](https://github.com/peterhinch/micropython-async/blob/master/aswitch.py)  
 [有道登录](https://github.com/WYL-BruceLong/Spider_JS_ReverseParsin)  
