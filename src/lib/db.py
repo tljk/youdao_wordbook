@@ -7,12 +7,7 @@ class DB():
             self.d = open('data','r+b')
         except:
             self.d = open('data','w+b')
-        self.data = btree.open(self.d, pagesize=1024)
-        try:
-            self.r = open('record','r+b')
-        except:
-            self.r = open('record','w+b')
-        self.records = btree.open(self.r, pagesize=1024)
+        self.data = btree.open(self.d)
         print('db init')
     
     def close(self):
@@ -23,37 +18,37 @@ class DB():
 
     def save(self,s):
         json=ujson.loads(s)
-        if self.data.get(json['word'].encode('utf-8')) == None:
-            word = json['word']
+        word = json['word']
+        if self.data.get(word.encode('utf-8')) == None:
             json.pop('word')
             json.pop('itemId')
             json.pop('modifiedTime')
             json.pop('bookId')
-            json['trans']=json['trans'].replace(' ', '')
+            json['p'] = json.pop('phonetic')
+            json['b'] = json.pop('bookName')
+            json['t'] = json.pop('trans')
             print('insert: '+word)
             # print(word+': '+ujson.dumps(json))
-            self.data[word]=ujson.dumps(json).encode('utf-8')
-
-    def record(self,word):
-        if self.records.get(word.encode('utf-8')) == None:
-            self.records[word] = str(1)
-            print('record: '+word+' 1')
+            self.data[word] = ujson.dumps(json).encode('utf-8')
         else:
-            self.records[word] = str(int(self.records[word].decode('utf-8')) + 1)
-            print('record: '+word+' '+self.records[word].decode('utf-8'))
-        self.records.flush()
+            curr = ujson.loads(self.data.get(word.encode('utf-8')).decode('utf-8'))
+            if curr['b'] != json['bookName'] or curr['p'] != json['phonetic'] or curr['t'] != json['trans']:
+                curr['p'] = json['phonetic']
+                curr['b'] = json['bookName']
+                curr['t'] = json['trans']
+                print('update: '+word)
+                # print(word+': '+ujson.dumps(curr))
+                self.data[word] = ujson.dumps(curr).encode('utf-8')
 
-    def printRecords(self):
-        for i in self.records.items():
-            print(i)
-    
+
+
     def printData(self):
         for i in self.data.values():
             print(i.decode('utf-8'))
     
     def flush(self):
         self.data.flush()
-        self.records.flush()
+        self.d.flush()
 
     def values(self):
         return self.data.values()

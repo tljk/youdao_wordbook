@@ -12,8 +12,7 @@ def set_global_exception():
 async def main():
     set_global_exception()  # Debug aid
     wb = Wordbook()
-    await wb.lock.acquire()
-    await uasyncio.gather(wb.crawler(),wb.button(),return_exceptions=True)
+    await uasyncio.gather(wb.crawler(),wb.screen(),wb.hiber(),return_exceptions=True)
 
     wb.epd.sleep()
     wb.epd.font_free()

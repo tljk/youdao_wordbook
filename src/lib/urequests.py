@@ -32,9 +32,6 @@ class Response:
         # url to see redirect targets
         self.url = None
         self.res = [
-            # [ure.compile('"itemId":"[0-9a-z]+",'),''],
-            # [ure.compile('"bookId":"[0-9a-z]+",'),''],
-            # [ure.compile('"modifiedTime":[0-9]+'),''],
             [ure.compile('\\\\n'),''],
             [ure.compile('，'),','],
             [ure.compile('；'),';'],
@@ -43,6 +40,8 @@ class Response:
             [ure.compile('）'),')'],
             [ure.compile('【'),'['],
             [ure.compile('】'),']'],
+            [ure.compile('。'),'.'],
+            [ure.compile('、'),','],
         ]
         
 
