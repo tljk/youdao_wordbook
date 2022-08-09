@@ -25,7 +25,11 @@ class Wordbook:
         self.epd = EPD_2in13_V3()
         self.db = DB()
         self.rtc = RTC()
-        self.count = random.randint(100,5000) # the count number traverse to next word
+        self.nvs = esp32.NVS('Wordbook')
+        try:
+            self.count = self.nvs.get_i32('curr') - 1
+        except:
+            self.count = random.randint(100,5000) # the count number traverse to next word
         self.epd.Clear()
         self.epd.fill(0xff)
         self.word = ''
@@ -41,7 +45,7 @@ class Wordbook:
 
         self.tick = 0
         self.b1 = Pin(12, Pin.IN, Pin.PULL_UP)
-        self.b1.irq(trigger=Pin.IRQ_RISING, handler=lambda t:self.press())
+        self.b1.irq(trigger=Pin.IRQ_FALLING, handler=lambda t:self.press())
         esp32.wake_on_ext0(pin = self.b1, level = esp32.WAKEUP_ALL_LOW)
         print('button init')
         
@@ -79,7 +83,8 @@ class Wordbook:
                     # crawler
                     param={
                         'limit': '1000000',
-                        'offset': ''
+                        'offset': '',
+                        # 'bookId': '18fd1866-e895-4f30-bbef-adcefe6ae31f'
                     }
                     # cookie
                     cookie = wbconfig.cookie
@@ -102,7 +107,7 @@ class Wordbook:
     
     def press(self):
         now = time.ticks_ms()
-        if time.ticks_diff(now, self.tick) > 300: # jitter
+        if time.ticks_diff(now, self.tick) > 300: # debouncing
             self.epdTSF.set()
         # print(self.tick, now)
         self.tick = now
@@ -210,6 +215,8 @@ class Wordbook:
 
                         machine.freq(240000000)
                         self.epd.TurnOnDisplayPart()
+                        self.nvs.set_i32('curr',index)
+                        self.nvs.commit()
                         self.count = 0
                         
             except KeyboardInterrupt:
