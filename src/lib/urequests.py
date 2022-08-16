@@ -42,6 +42,7 @@ class Response:
             [ure.compile('】'),']'],
             [ure.compile('。'),'.'],
             [ure.compile('、'),','],
+            [ure.compile(' ;'),';'],
         ]
         
 

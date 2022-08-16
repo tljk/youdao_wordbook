@@ -38,7 +38,6 @@ class Wordbook:
         self.crawlerTSF.set()
 
         self.startup = True # auto crawler retry when startup
-        self.pause = 10 # time to sleep when no action
 
         self.tick = 0
         self.b1 = Pin(12, Pin.IN, Pin.PULL_UP)
@@ -63,7 +62,7 @@ class Wordbook:
                         print('start to connect: '+w)
                         self.wifi.config(reconnects=2)
                         self.wifi.connect(w,wbconfig.wifi[w])
-                        while not self.wifi.isconnected() and self.wifi.status() not in [203,200,204,201,202]:
+                        while not self.wifi.isconnected() and self.wifi.status() not in [15,203,200,204,205,201,202]:
                             await uasyncio.sleep(1)   # not in error status, wait
                             print(self.wifi.status())
                         if self.wifi.isconnected():
@@ -76,15 +75,9 @@ class Wordbook:
                     import ntptime
                     ntptime.settime()
                     print(self.rtc.datetime())
-                    # crawler
-                    param={
-                        'limit': '1000000',
-                        'offset': '',
-                        # 'bookId': '18fd1866-e895-4f30-bbef-adcefe6ae31f'
-                    }
+
                     # cookie
-                    cookie = wbconfig.cookie
-                    res = request('GET','http://dict.youdao.com/wordbook/webapi/words', params=param, cookies=cookie)
+                    res = request('GET','http://dict.youdao.com/wordbook/webapi/words', params=wbconfig.param, cookies=wbconfig.cookie)
                     await res.saveYoudao(self.db)
 
             except BaseException as e:
@@ -95,7 +88,6 @@ class Wordbook:
             else:
                 self.startup = False
 
-            self.pause = 10
             self.db.flush()
             self.lock.release()
             self.wifi.active(False) 
@@ -110,20 +102,17 @@ class Wordbook:
 
     async def hiber(self):
         while True:
-            await uasyncio.sleep(1)
+            await uasyncio.sleep(5)
             if not self.lock.locked():
-                if self.pause > 0:
-                    self.pause -= 1
+                print('sleep')
+                self.epd.sleep()
+                await uasyncio.sleep(0.5)
+                machine.lightsleep(1000*60*60)
+                # print(machine.wake_reason())
+                if machine.wake_reason() == 4:
+                    self.crawlerTSF.set()
                 else:
-                    print('sleep')
-                    self.epd.sleep()
-                    await uasyncio.sleep(0.5)
-                    machine.lightsleep(1000*60*60)
-                    # print(machine.wake_reason())
-                    if machine.wake_reason() == 4:
-                        self.crawlerTSF.set()
-                    else:
-                        self.epd.reset()
+                    self.epd.reset()
 
     async def screen(self):
         print('screen init')
@@ -143,10 +132,10 @@ class Wordbook:
                         machine.freq(240000000)
                         # print('load data')
                         gc.collect()
+                        # print(gc.mem_free())
                         self.epd.frame(index, w[0], ujson.loads(w[1].decode('utf-8')))  
                         self.epd.display_Partial(self.epd.bufferTrans)
 
-                        self.pause = 30
                         self.nvs.set_i32('curr',index)
                         self.nvs.commit()
                         self.count = 0

@@ -511,25 +511,26 @@ class EPD_2in13_V3(framebuf.FrameBuffer):
             composeSet = {'size': 12, 'width': 20, 'height': 8}
 
         # trans each line
-        curr = 0
+        start, end, bindex = 0, 0, 0
+        transBytes = json['t'].encode()
         for i in range(composeSet['height']):
-            line = ''
             count = composeSet['width']*2
-            while curr < len(json['t']):
-                if len(json['t'][curr].encode()) == 3:
-                    count -= 2
-                else:
+            while count > 0 and end < len(json['t']) and bindex < len(transBytes):
+                if transBytes[bindex]&0x80 == 0:
                     count -= 1
-                if count < 0:
-                    break
-                line += json['t'][curr]
-                curr += 1
-            self.text(line, 0, 25 + composeSet['size'] * i, 0x00)
-            if curr >= len(json['t']):
+                    bindex += 1
+                else:                                              
+                    if count == 1:
+                        break
+                    count -= 2
+                    bindex += 3     
+                end += 1
+            self.text(json['t'][start:end], 0, 25 + composeSet['size'] * i, 0x00)
+            # print(json['t'][start:end])
+            if end >= len(json['t']):
                 break
-            # print(line)
-        
-        return self.transform()
+            start = end   
+        self.transform()
 
 if __name__=='__main__':
     epd = EPD_2in13_V3()
