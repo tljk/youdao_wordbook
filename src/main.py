@@ -11,6 +11,7 @@ import random
 import wbconfig
 import machine
 import gc
+import os
 import time
 import esp32
 
@@ -37,7 +38,7 @@ class Wordbook:
         self.epdTSF.set()
         self.crawlerTSF.set()
 
-        self.startup = True # auto crawler retry when startup
+        self.startup = True # force crawler retry when startup
 
         self.tick = 0
         self.b1 = Pin(12, Pin.IN, Pin.PULL_UP)
@@ -75,6 +76,7 @@ class Wordbook:
                     import ntptime
                     ntptime.settime()
                     print(self.rtc.datetime())
+                    print(os.statvfs('/'))
 
                     # cookie
                     res = request('GET','http://dict.youdao.com/wordbook/webapi/words', params=wbconfig.param, cookies=wbconfig.cookie)

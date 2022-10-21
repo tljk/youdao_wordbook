@@ -39,7 +39,8 @@ https://www.waveshare.net/shop/2.13inch-e-Paper-Cloud-Module.htm
    清除flash，COM4对应着设备端口号  
    `esptool.py --port COM4 erase_flash`  
    刷入对应镜像  
-   `esptool.py --chip esp32 --port COM4 write_flash -z 0x1000 esp32_1.17_fb_boost_4M_ULAB.bin`
+   `esptool.py --chip esp32 --port COM4 write_flash -z 0x1000 esp32_1.17_fb_boost_4M_ULAB.bin`  
+   新增1.19.1，执行效率高，预留空间更大   
 4. 修改配置  
    切换到Spider_JS_ReverseParsin  
    `cd Spider_JS_ReverseParsin`  
@@ -50,9 +51,18 @@ https://www.waveshare.net/shop/2.13inch-e-Paper-Cloud-Module.htm
    成功后会打印账号对应cookie以及生成单词数据文件youdao.json  
    将cookie填入wbconfig.py中"cookie="后  
    修改wifi ssid和密码  
-5. 上传代码  
+5. 预编译  
+   `pip install mpy-cross==1.18`  
+   执行build.bat  
+   或者使用mpy-cross对boot.py除外的所有py文件执行编译  
+     
+   如果报错mpy-cross版本不兼容，需要重新安装对应版本重新编译  
+   v5对应1.18及以下  
+   v6对应1.19及以上  
+   
+6. 上传代码  
    安装vscode 安装Pymakr插件  
-   使用vscode打开/root文件夹  
+   使用vscode打开/build文件夹(编译后)  
    连接并upload代码  
      
    参考[在vscode里基于Pymakr插件进行esp32的micropython开发](https://www.bilibili.com/read/cv7262936)  
@@ -62,7 +72,9 @@ https://www.waveshare.net/shop/2.13inch-e-Paper-Cloud-Module.htm
 模型文件：[shell2 v8.f3d](https://github.com/tljk/youdao_wordbook/blob/master/shell2_v8.f3d), [shell2 v8.stl](https://github.com/tljk/youdao_wordbook/blob/master/shell2_v8.stl)  
 壁面很薄，打印请使用刚性树脂，周围添加支撑
 
-## 轮子
+## 已知问题
+1. OSError 28，空间不足或者data文件损坏
+## 鸣谢
 [framebuf中文](https://github.com/wangshujun-tj/mpy-Framebuf-boost-code)  
 [cookie支持](https://github.com/mardigras2020/urequests)  
 [epaper驱动](https://github.com/tljk/2.13inch-e-Paper-Cloud-Module-micropython-driver)  
